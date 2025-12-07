@@ -23,13 +23,7 @@ h6 {
 }
 
 /* You can apply more specific styling to individual headers */
-h1 {
-  font-size: 2em; /* 2 times the parent element's font size */
-}
-
-h2 {
-  font-size: 1.5em;
-}
+/* */
 
 p {
   /* Paragraphs will inherit the 'YourRegularFont' from the body selector above */
