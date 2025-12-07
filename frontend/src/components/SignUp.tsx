@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -14,26 +14,28 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field";
 import { Input } from "./ui/input";
 import axios from "axios";
 
-// Mock API function - replace this with your actual Mailchimp API endpoint later
-async function subscribeToMailchimp(email: string): Promise<void> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+// API base URL - adjust this to match your backend URL
+// In production, set this to your actual backend URL
+const API_BASE_URL = "http://localhost:3000";
 
-  // Mock validation - reject obviously invalid emails
-  if (!email.includes("@") || !email.includes(".")) {
-    throw new Error("Please enter a valid email address");
-  }
-
-  // Mock API call - replace with actual Mailchimp endpoint
-  // Example: await axios.post('/api/mailchimp/subscribe', { email });
-
-  // Simulate random failures for testing (10% failure rate)
-  if (Math.random() < 0.1) {
-    throw new Error("Unable to subscribe. Please try again later.");
-  }
-
-  // Success - in real implementation, this would be the actual API response
-  return Promise.resolve();
+/**
+ * Subscribe user to Mailchimp via backend API
+ * @param email - The email address to subscribe
+ * @returns Promise with the subscription response
+ */
+async function subscribeToMailchimp(
+  email: string
+): Promise<{ message: string }> {
+  const response = await axios.post(
+    `${API_BASE_URL}/api/mailchimp/subscribe`,
+    { email },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
 }
 
 interface FormData {
@@ -69,13 +71,14 @@ function SignUp() {
       }, 2000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setSubmitError(
+        // Backend returns { error: "message" } on failure
+        const errorMessage =
+          error.response?.data?.error ||
           error.response?.data?.message ||
-            error.message ||
-            "An error occurred. Please try again."
-        );
+          error.message ||
+          "An error occurred. Please try again.";
+        setSubmitError(errorMessage);
       } else if (error instanceof Error) {
-        // Handle other errors
         setSubmitError(error.message);
       } else {
         setSubmitError("An unexpected error occurred. Please try again.");
